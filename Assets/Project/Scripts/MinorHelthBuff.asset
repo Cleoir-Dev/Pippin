@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69f7d0647dd4ed840babe66193af05fc, type: 3}
   m_Name: MinorHelthBuff
   m_EditorClassIdentifier: 
-  amount: 2
+  amount: 1
