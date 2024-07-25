@@ -55,12 +55,13 @@ public class PlayerControl : MonoBehaviour
 
     [Header("Config Die")]
     public GameObject playerDie;
-    public float loadSceneTime = 3f;
+    public float loadTime = 3f;
 
     [Header("Config Dust")]
     public ParticleSystem dust;
  
     public bool invincible;
+    public int maxLife = 3;
 
     private bool isWallJumping = false;
     private bool isWallSliding = false;
@@ -86,6 +87,7 @@ public class PlayerControl : MonoBehaviour
 
     private Vector2 colliderSize;
     private Vector2 position;
+    private Vector2 checkPointPosition;
 
     private Animator playerAnimator;
     private Rigidbody2D playerRb;
@@ -101,13 +103,46 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] private PhysicsMaterial2D noFrictionMaterial;
     [SerializeField] private PhysicsMaterial2D frictionMaterial;
 
+    public void DeathEnemy(Collider2D collision)
+    {
+        var positionEnemy = collision.gameObject.transform.position;
+        GameObject tempExplosion = Instantiate(controlGame.hitPrefab, positionEnemy, transform.localRotation);
+        Destroy(tempExplosion, 0.5f);
 
-    void Start()
+        fxGame.PlayOneShot(fxExplosion);
+        Destroy(collision.gameObject);
+    }
+
+    public void SetBarLife(int newlife)
+    {
+        life = newlife;
+        controlGame.BarLifes(life);
+    }
+
+    public void SetPoints(int points)
+    {
+        controlGame.Points(points);
+    }
+
+    public void SetBarStars(int newStar)
+    {
+        controlGame.BarStars(newStar);
+    }
+
+    public void SetInvincible(float timeInvincible, Color color)
+    {
+        StartCoroutine(EffectColor(color, timeInvincible));
+    }
+    public void UpdateCkeckpoint(Vector2 pos)
+    {
+        checkPointPosition = pos;
+    }
+
+    private void Start()
     {
         LoadComponents();
     }
-
-    void Update()
+    private void Update()
     {
         GlobalPosition();
         DetectWall();
@@ -117,18 +152,6 @@ public class PlayerControl : MonoBehaviour
         HandleInput();
         HandleAnimator();
     }
-
-    public void SetBarLife(int newlife)
-    {
-        life = newlife;
-        controlGame.BarLifes(life);
-    }
-
-    public void SetInvincible(float timeInvincible, Color color)
-    {
-        StartCoroutine(EffectColor(color, timeInvincible));
-    }
-
     private void FixedUpdate()
     {
         MovePlayer();
@@ -142,6 +165,16 @@ public class PlayerControl : MonoBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+    private void ResetStateNewPosition()
+    {
+        gameObject.SetActive(true);
+        position = checkPointPosition;
+        playerRb.position = new Vector2(checkPointPosition.x, checkPointPosition.y);
+        spriteRenderer.color = noHitColor;
+        invincible = false;
+        SetBarLife(maxLife);
+        spriteRenderer.enabled = true;
+    }
     private void LoadComponents()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -152,18 +185,16 @@ public class PlayerControl : MonoBehaviour
         controlGame = FindObjectOfType(typeof(ControllerGame)) as ControllerGame;
         playerRb.gravityScale = gravityScale;
         colliderSize = playerCollider.size;
+        maxLife = life;
     }
-
     private void GlobalPosition()
     {
         position = transform.position - new Vector3(0f, colliderSize.y / groundDistanceYCollider, 0f);
     }
-
     private void DetectGround()
     {
         isGround = Physics2D.Raycast(position, Vector3.down, groundCheckDistance, 1 << LayerMask.NameToLayer("Ground"));
     }
-
     private void DetectWall()
     {
         if (facingRight)
@@ -175,7 +206,6 @@ public class PlayerControl : MonoBehaviour
             isTouchingWall = Physics2D.Raycast(wallCheck.position, Vector3.left, wallCheckDistance, 1 << LayerMask.NameToLayer("Wall"));
         }
     }
-
     private void DetectSlopes()
     {
 
@@ -196,7 +226,6 @@ public class PlayerControl : MonoBehaviour
             playerRb.sharedMaterial = noFrictionMaterial;
         }
     }
-
     private void DetectWallSliding()
     {
         if (isTouchingWall && !isGround)
@@ -210,7 +239,6 @@ public class PlayerControl : MonoBehaviour
             isWallSliding = false;
         }
     }
-
     private void MovePlayer()
     {
         if (!isWallJumping)
@@ -223,7 +251,6 @@ public class PlayerControl : MonoBehaviour
             }
         }
     }
-
     private void DashPlayer()
     {
         if (canDash)
@@ -242,14 +269,12 @@ public class PlayerControl : MonoBehaviour
             return;
         }
     }
-
     private void Flip()
     {
         facingRight = !facingRight;
         transform.localScale = new
             Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
     }
-
     private void ClimbingPlayer()
     {
         if (isLadder)
@@ -275,7 +300,6 @@ public class PlayerControl : MonoBehaviour
             playerRb.gravityScale = gravityScale;
         }
     }
-
     private void JumpPlayer()
     {
         if (jump && !isWallSliding)
@@ -299,7 +323,6 @@ public class PlayerControl : MonoBehaviour
             jump = false;
         }
     }
-
     private void WallJump()
     {
 
@@ -338,7 +361,6 @@ public class PlayerControl : MonoBehaviour
         }
 
     }
-
     private void HandleInput()
     {
         dashInput = Input.GetButtonDown("Dash");
@@ -352,7 +374,6 @@ public class PlayerControl : MonoBehaviour
             jump = true;
         }
     }
-
     private void Hurt()
     {
         if (!invincible)
@@ -363,18 +384,27 @@ public class PlayerControl : MonoBehaviour
             StartCoroutine(EffectColor(hitColor, damageTimeColor));
             controlGame.BarLifes(life);
 
-            if (life < 1)
+            if(life < 1 && controlGame.scoreStar > 0)
+            {
+                controlGame.scoreStar--;
+                controlGame.BarStars(controlGame.scoreStar);
+
+                life = maxLife;
+                controlGame.BarLifes(life);
+            }
+
+            if (life < 1 && controlGame.scoreStar == 0)
             {
                 GameObject playerDieTemp = Instantiate(playerDie, transform.position, Quaternion.identity);
                 Rigidbody2D rbDie = playerDieTemp.GetComponent<Rigidbody2D>();
                 rbDie.AddForce(new Vector2(150f, 500f));
                 fxGame.PlayOneShot(fxDie);
-                Invoke("LoadScene", loadSceneTime);
+                Invoke("ResetStateNewPosition", loadTime);
+                spriteRenderer.enabled = false;
                 gameObject.SetActive(false);
             }
         }
     }
-
     private void HandleAnimator()
     {
         playerAnimator.SetBool("IsGrounded", isGround);
@@ -385,12 +415,14 @@ public class PlayerControl : MonoBehaviour
         playerAnimator.SetFloat("EixoY", playerRb.velocity.y);
         playerAnimator.SetBool("Dash", isDashing);
     }
-
+    private void StopWallJump()
+    {
+        isWallJumping = false;
+    }
     private void CreateDust()
     {
         dust.Play();
     }
-
     private void OnCollisionStay2D(Collision2D collision)
     {
         switch (collision.gameObject.tag)
@@ -406,7 +438,6 @@ public class PlayerControl : MonoBehaviour
                 break;
         }
     }
-
     private void OnCollisionExit2D(Collision2D collision)
     {
         switch (collision.gameObject.tag)
@@ -416,7 +447,6 @@ public class PlayerControl : MonoBehaviour
                 break;
         }
     }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         switch (collision.gameObject.tag)
@@ -430,20 +460,13 @@ public class PlayerControl : MonoBehaviour
                 isLadder = true;
                 break;
             case "Enemy":
-                var positionEnemy = collision.gameObject.transform.position;
-                GameObject tempExplosion = Instantiate(controlGame.hitPrefab, positionEnemy, transform.localRotation);
-                Destroy(tempExplosion, 0.5f);
-
                 Rigidbody2D rb = GetComponentInParent<Rigidbody2D>();
                 rb.velocity = new Vector2(rb.velocity.x, 0);
                 rb.AddForce(new Vector2(0, jumpForce));
-
-                fxGame.PlayOneShot(fxExplosion);
-                Destroy(collision.gameObject);
+                DeathEnemy(collision);
                 break;
         }
     }
-
     private void OnTriggerExit2D(Collider2D collision)
     {
         switch (collision.gameObject.tag)
@@ -453,7 +476,6 @@ public class PlayerControl : MonoBehaviour
                 break;
         }
     }
-
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.white;
@@ -467,20 +489,13 @@ public class PlayerControl : MonoBehaviour
             Gizmos.DrawLine(wallCheck.position,
                 new Vector3(wallCheck.position.x - wallCheckDistance, wallCheck.position.y, wallCheck.position.z));
         }
-    }
-
-    private void StopWallJump()
-    {
-        isWallJumping = false;
-    }
-
+    }   
     private IEnumerator StopDashing()
     {
         yield return new WaitForSeconds(dashingTime);
         trailRenderer.emitting = false;
         isDashing = false;
     }
-
     private IEnumerator EffectColor(Color color, float time)
     {
         spriteRenderer.color = color;
@@ -497,5 +512,4 @@ public class PlayerControl : MonoBehaviour
         spriteRenderer.color = noHitColor;
         invincible = false;
     }
-
 }

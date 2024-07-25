@@ -63,6 +63,7 @@
     <Compile Include="Assets\Project\Scripts\HealthBuff.cs" />
     <Compile Include="Assets\Underwater Diving\Scripts\PlayerController.cs" />
     <Compile Include="Assets\Underwater Diving\Scripts\ParallaxBackground.cs" />
+    <Compile Include="Assets\Project\Scripts\PlayerAttack.cs" />
     <Compile Include="Assets\Project\Scripts\Teleport.cs" />
     <Compile Include="Assets\Underwater Diving\Scripts\PressEnter.cs" />
     <Compile Include="Assets\Project\Scripts\ControllerPlatform.cs" />
@@ -72,6 +73,8 @@
     <Compile Include="Assets\Project\Scripts\ControllerFade.cs" />
     <Compile Include="Assets\Project\Scripts\ControllerScenes.cs" />
     <Compile Include="Assets\Project\Scripts\IABee.cs" />
+    <Compile Include="Assets\Project\Scripts\Projectile.cs" />
+    <Compile Include="Assets\Project\Scripts\CheckPoint.cs" />
     <Compile Include="Assets\Underwater Diving\Scripts\HurtPlayer.cs" />
     <Compile Include="Assets\Project\Scripts\PowerUpEffect.cs" />
     <Compile Include="Assets\Project\Scripts\PlayerTeleport.cs" />
