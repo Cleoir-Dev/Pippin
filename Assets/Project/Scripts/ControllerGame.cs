@@ -19,6 +19,11 @@ public class ControllerGame : MonoBehaviour
         txtScore.text = score.ToString();      
     }
 
+    public int GetScore()
+    {
+        return score;
+    }
+
     public void BarLifes(int healthLife)
     {
         barLife.sprite = imagesLifes[healthLife];

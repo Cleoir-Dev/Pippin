@@ -103,14 +103,14 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] private PhysicsMaterial2D noFrictionMaterial;
     [SerializeField] private PhysicsMaterial2D frictionMaterial;
 
-    public void DeathEnemy(Collider2D collision)
+    public void DeathEnemy(GameObject gameObject)
     {
-        var positionEnemy = collision.gameObject.transform.position;
+        var positionEnemy = gameObject.transform.position;
         GameObject tempExplosion = Instantiate(controlGame.hitPrefab, positionEnemy, transform.localRotation);
         Destroy(tempExplosion, 0.5f);
 
         fxGame.PlayOneShot(fxExplosion);
-        Destroy(collision.gameObject);
+        Destroy(gameObject);
     }
 
     public void SetBarLife(int newlife)
@@ -380,6 +380,7 @@ public class PlayerControl : MonoBehaviour
         {
             life--;
             invincible = true;
+
             fxGame.PlayOneShot(fxHit);
             StartCoroutine(EffectColor(hitColor, damageTimeColor));
             controlGame.BarLifes(life);
@@ -403,6 +404,7 @@ public class PlayerControl : MonoBehaviour
                 spriteRenderer.enabled = false;
                 gameObject.SetActive(false);
             }
+
         }
     }
     private void HandleAnimator()
@@ -431,7 +433,15 @@ public class PlayerControl : MonoBehaviour
                 transform.parent = collision.transform;
                 break;
             case "Enemy":
-                Hurt();
+                if(invincible)
+                {
+                    DeathEnemy(collision.gameObject);
+                }
+                else
+                {
+                  Hurt();
+                }
+                
                 break;
             case "Damage":
                 Hurt();
@@ -463,7 +473,7 @@ public class PlayerControl : MonoBehaviour
                 Rigidbody2D rb = GetComponentInParent<Rigidbody2D>();
                 rb.velocity = new Vector2(rb.velocity.x, 0);
                 rb.AddForce(new Vector2(0, jumpForce));
-                DeathEnemy(collision);
+                DeathEnemy(collision.gameObject);
                 break;
         }
     }

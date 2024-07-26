@@ -31,7 +31,7 @@ public class Projectile : MonoBehaviour
 
             if(collision.tag == "Enemy")
             {
-                player.DeathEnemy(collision);
+                player.DeathEnemy(collision.gameObject);
             }
         }
         
