@@ -71,6 +71,7 @@
     <Compile Include="Assets\Project\Scripts\IASlug.cs" />
     <Compile Include="Assets\Underwater Diving\Scripts\Enemy.cs" />
     <Compile Include="Assets\Project\Scripts\ControllerFade.cs" />
+    <Compile Include="Assets\Project\Scripts\ChaseControl.cs" />
     <Compile Include="Assets\Project\Scripts\ControllerScenes.cs" />
     <Compile Include="Assets\Project\Scripts\IABee.cs" />
     <Compile Include="Assets\Project\Scripts\Projectile.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="Assets\Underwater Diving\Scripts\DestroyObject.cs" />
     <Compile Include="Assets\Project\Scripts\PlayerControl.cs" />
     <Compile Include="Assets\Project\Scripts\ControllerGame.cs" />
+    <Compile Include="Assets\Project\Scripts\IAVulture.cs" />
     <Compile Include="Assets\Underwater Diving\Scripts\CameraController.cs" />
     <Compile Include="Assets\Project\Scripts\CameraControl.cs" />
   </ItemGroup>

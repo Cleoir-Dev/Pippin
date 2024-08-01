@@ -20,7 +20,11 @@ public class PlayerAttack : MonoBehaviour
         if(Input.GetButtonDown("Fire1") && controlGame.GetScore() > 0)
         {
             controlGame.Points(-1);
-            Instantiate(projectile, firePosition.position, firePosition.rotation);
+            GameObject shot = Instantiate(projectile, firePosition.position, firePosition.rotation);
+            if(shot)
+            {
+                Destroy(shot, 2.0f);
+            } 
         }       
     }
 }
